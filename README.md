@@ -1,53 +1,153 @@
-# Video educativo sobre eleicao de diretores escolares
+# Remotion video project | Eleicao de diretores escolares
 
-Projeto de portfolio desenvolvido com **Remotion**, **React** e **TypeScript** para criar um video educativo animado em portugues do Brasil sobre o processo de eleicao de diretores escolares.
+Projeto de motion design em codigo desenvolvido com **Remotion**, **React** e **TypeScript** para gerar um video educativo em `1920x1080`, `30 FPS`, com duracao ajustada dinamicamente a partir do audio principal.
 
-![Preview do projeto](docs/thumbnail.png)
+Mais do que um video institucional, este repositorio foi organizado como um **case tecnico de programacao de video**: composicao declarativa, sincronizacao por frames, modularizacao em cenas e pipeline de render automatizado.
 
-## Visao geral
+![Preview tecnico do projeto](docs/thumbnail.png)
 
-Este projeto foi pensado como um case de portfolio que combina narrativa audiovisual, motion design em codigo e organizacao de uma composicao completa em multiplas cenas.
-
-O video apresenta, de forma acessivel e visual, as principais etapas da escolha democratica de diretores escolares:
-
-- organizacao do processo
-- inscricao de candidaturas
-- divulgacao
-- campanha
-- votacao
-- apuracao
-- resultado final
-
-## Objetivo
-
-Criar um material audiovisual claro, didatico e visualmente atraente para explicar como a comunidade escolar participa da escolha da direcao da escola.
-
-## Publico-alvo
-
-- estudantes
-- familias
-- servidores e professores
-- comunidade escolar em geral
-- equipes interessadas em comunicacao institucional com motion design em codigo
-
-## Stack utilizada
+## Stack
 
 - `Remotion`
 - `React 18`
 - `TypeScript`
-- `@remotion/google-fonts`
+- `@remotion/cli`
 - `@remotion/media-utils`
+- `@remotion/google-fonts`
 
-## Destaques tecnicos
+## O que este projeto demonstra
 
-- composicao principal em `1920x1080` a `30 FPS`
-- duracao do video calculada automaticamente a partir do audio principal
-- estrutura modular com separacao entre `components`, `scenes` e `data`
-- legendas sincronizadas por janelas de fala mapeadas em frames
-- elementos visuais reutilizaveis para personagens, cards, fundos e icones
-- pipeline simples para studio, render final, master e thumbnail
+- uso de `Composition` para definir uma renderizacao de video baseada em componentes React
+- calculo dinamico de `durationInFrames` a partir do audio com `getAudioDurationInSeconds()`
+- organizacao da timeline em **10 cenas independentes**
+- sincronizacao de legendas por janelas de fala medidas em frames
+- carregamento controlado de fonte com `delayRender()` e `continueRender()`
+- separacao clara entre logica de timeline, dados, componentes visuais e assets
 
-## Estrutura do projeto
+## Arquitetura tecnica
+
+### 1. Entrada da aplicacao
+
+O entrypoint do Remotion fica em `src/index.ts`, onde o projeto registra a raiz com:
+
+```ts
+registerRoot(Root);
+```
+
+### 2. Composicao principal
+
+Em `src/Root.tsx`, a composicao `MainVideo` define:
+
+- `fps`: `30`
+- `width`: `1920`
+- `height`: `1080`
+- `calculateMetadata`: leitura da duracao real do audio antes do render
+
+O comportamento importante aqui e que o video **nao usa uma duracao fixa rigida**. Em vez disso, a duracao final e calculada a partir de `public/audio-back.mp3`, garantindo que a timeline acompanhe o audio principal.
+
+### 3. Orquestracao da timeline
+
+Em `src/MainVideo.tsx`, a aplicacao:
+
+- renderiza o audio com `staticFile(AUDIO_FILE)`
+- calcula os intervalos das cenas com `buildSceneTimings()`
+- seleciona a cena ativa com base no frame global
+- aplica transicoes de opacidade entre cenas
+- mantem uma `ProgressBar` global ao longo de toda a composicao
+
+### 4. Camada de dados
+
+O arquivo `src/constants.ts` centraliza configuracoes da timeline, como:
+
+- `FPS`, `WIDTH`, `HEIGHT`
+- arquivo de audio principal
+- frames de transicao
+- mapa de janelas de fala
+- pontos de inicio de cada cena
+
+O arquivo `src/data/subtitles.ts` converte as janelas de fala medidas em uma estrutura de legendas por cena, garantindo sincronizacao consistente entre narracao e texto na tela.
+
+### 5. Sistema de cenas e componentes
+
+O projeto esta separado em:
+
+- `src/scenes/`: cenas da narrativa
+- `src/components/`: elementos visuais reutilizaveis
+- `src/data/`: dados de legenda e sincronizacao
+- `src/types.ts`: contratos tipados da timeline
+
+Essa separacao facilita:
+
+- manutencao
+- extensao da timeline
+- reaproveitamento de componentes
+- substituicao de audio, textos ou cena sem refatoracao estrutural
+
+## Pipeline de render
+
+### Studio
+
+```bash
+npm run start
+```
+
+Abre o Remotion Studio para inspecionar a composicao `MainVideo`, navegar frame a frame e validar animacoes, alinhamento e legendas.
+
+### Render final
+
+```bash
+npm run render
+```
+
+Gera:
+
+```text
+out/school-election.mp4
+```
+
+Configuracao atual:
+
+- codec `h264`
+- `crf=18`
+- sobrescrita automatica do output
+
+### Master em alta qualidade
+
+```bash
+npm run render:master
+```
+
+Gera uma saida em ProRes com audio PCM, util para pos-producao ou arquivamento.
+
+### Export de frames
+
+```bash
+npm run render:frames
+```
+
+Exporta a timeline como sequencia de imagens.
+
+### Thumbnail versionada
+
+```bash
+npm run thumbnail
+```
+
+Gera a imagem de preview usada no proprio README:
+
+```text
+docs/thumbnail.png
+```
+
+### Validacao de tipos
+
+```bash
+npm run typecheck
+```
+
+Executa `tsc --noEmit`.
+
+## Estrutura do repositorio
 
 ```text
 .
@@ -60,83 +160,72 @@ Criar um material audiovisual claro, didatico e visualmente atraente para explic
 |  |- scenes/
 |  |- constants.ts
 |  |- MainVideo.tsx
-|  `- Root.tsx
+|  |- Root.tsx
+|  |- index.ts
+|  `- types.ts
 |- docs/
 |  `- thumbnail.png
 |- assets/
 |  |- README.md
-|  `- raw/               # materiais brutos e arquivos de processo (ignorados no Git)
+|  `- raw/               # materiais brutos e arquivos de processo
 |- remotion.config.ts
 |- package.json
 `- README.md
 ```
 
-## Como executar localmente
+## Decisoes tecnicas relevantes
 
-### 1. Instalar dependencias
+### Public dir dedicada
 
-```bash
-npm install
-```
+`remotion.config.ts` define `Config.setPublicDir("public")` para manter os assets de runtime isolados e evitar que pastas de ambiente local entrem no bundle.
 
-### 2. Abrir o Remotion Studio
+### Duracao orientada por audio
 
-```bash
-npm run start
-```
+Em vez de fixar manualmente a timeline, o projeto usa `calculateMetadata()` para ajustar a composicao a partir da duracao real do audio. Isso evita drift entre narracao e video.
 
-### 3. Gerar o video final
+### Sincronizacao por frames
 
-```bash
-npm run render
-```
+As legendas nao sao "soltas" na interface: elas sao derivadas de intervalos medidos (`from` / `to`) e transformadas em cues tipados por cena.
 
-### 4. Gerar uma thumbnail do projeto
+### Animacao declarativa
 
-```bash
-npm run thumbnail
-```
+As cenas usam primitivas do Remotion como:
 
-### 5. Validar tipagem
+- `spring()`
+- `interpolate()`
+- `useCurrentFrame()`
+- `useVideoConfig()`
+- `AbsoluteFill`
 
-```bash
-npm run typecheck
-```
+Isso mantem a animacao previsivel, reproduzivel e facil de refatorar.
 
-## Scripts disponiveis
+## Como adaptar este projeto
 
-- `npm run start`: abre o Remotion Studio para edicao e preview
-- `npm run render`: gera o video final em `out/school-election.mp4`
-- `npm run render:hd`: gera a versao H.264 do projeto
-- `npm run render:master`: gera uma versao master em ProRes
-- `npm run render:frames`: exporta os frames em sequencia de imagens
-- `npm run still`: gera uma imagem estatica em `out/thumbnail.png`
-- `npm run thumbnail`: gera a thumbnail versionada em `docs/thumbnail.png`
-- `npm run typecheck`: executa a validacao de tipos com TypeScript
+Se voce quiser reutilizar este case para outro video em Remotion, os pontos principais de troca sao:
 
-## Resultado esperado
+- `public/audio-back.mp3`: trilha/narracao principal
+- `src/data/subtitles.ts`: textos e sincronizacao
+- `src/constants.ts`: timings, transicoes e resolucao
+- `src/scenes/`: layout e narrativa visual de cada etapa
 
-O resultado final e um video educativo animado, com identidade visual consistente, ritmo guiado pelo audio e mensagens distribuidas em cenas tematicas. O projeto foi organizado para ser facil de entender, executar e apresentar como portfolio tecnico.
+## Assets e versionamento
 
-## Organizacao para portfolio
+O repositorio publico mantem apenas os assets necessarios para o render atual.
 
-Para deixar o repositorio mais profissional e pronto para publicacao:
+- `public/` contem os arquivos usados em runtime
+- `assets/raw/` guarda materiais brutos, testes e variacoes
+- `out/` fica fora do Git para nao versionar renders pesados
 
-- `public/` contem apenas os assets necessarios para o render atual
-- `assets/raw/` guarda arquivos brutos e materiais de processo
-- `out/` fica fora do versionamento para nao subir renders pesados
-- `.agents/`, `.claude/` e dependencias locais tambem ficam ignorados
+## Posicionamento do projeto
 
-## Melhorias futuras
+Este repositorio foi preparado para portfolio com foco em:
 
-- adicionar uma GIF curta ou video demonstrativo no README
-- incluir bastidores do processo criativo e storyboard
-- criar variacoes de formato para redes sociais
-- parametrizar textos e trilhas para reaproveitamento em outros videos
+- engenharia de video com Remotion
+- arquitetura de composicoes React para motion
+- sincronizacao audiovisual orientada por dados
+- organizacao de um pipeline de render local em TypeScript
 
 ## Autoria
-
-Projeto organizado e apresentado como case de portfolio pessoal.
 
 - Autor(a): `[Seu nome aqui]`
 - GitHub: `[https://github.com/seu-usuario](https://github.com/seu-usuario)`
@@ -146,4 +235,4 @@ Projeto organizado e apresentado como case de portfolio pessoal.
 
 - Alguns assets visuais e de audio podem ter origem institucional ou de terceiros e podem exigir credito ou restricoes de uso especificas.
 - Este repositorio nao esta sendo publicado com uma licenca aberta neste momento.
-- Antes de publicar externamente ou reutilizar os materiais, revise a origem e os direitos de cada asset.
+- Antes de reutilizar os assets, revise a origem e os direitos de cada arquivo.
