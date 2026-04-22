@@ -1,0 +1,29 @@
+{
+  "name": "school-election-video",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Video educativo animado sobre a eleicao de diretores escolares em portugues do Brasil.",
+  "scripts": {
+    "start": "npx remotion studio src/index.ts",
+    "render": "npx remotion render src/index.ts MainVideo out/school-election.mp4 --codec=h264 --crf=18",
+    "render:hd": "npx remotion render src/index.ts MainVideo out/school-election.mp4 --codec=h264 --crf=18",
+    "render:master": "npx remotion render src/index.ts MainVideo out/school-election-master.mov --codec=prores --prores-profile=4444-xq --audio-codec=pcm-16",
+    "render:frames": "npx remotion render src/index.ts MainVideo out/frames --image-sequence --video-image-format=png",
+    "still": "npx remotion still src/index.ts MainVideo --frame=0 out/thumbnail.png",
+    "thumbnail": "npx remotion still src/index.ts MainVideo --frame=0 docs/thumbnail.png",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.0",
+    "@remotion/google-fonts": "^4.0.0",
+    "@remotion/media-utils": "^4.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.1",
+    "typescript": "^5.4.5"
+  }
+}
